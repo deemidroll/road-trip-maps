@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>May 14 — El Paso → Truth or Consequences</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow:hidden}
+body{background:#111;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#fff}
+#map{position:absolute;top:0;bottom:0;width:100%;z-index:0}
+#header{position:fixed;top:12px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:520px;z-index:1000;background:rgba(28,28,30,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 14px;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px}
+#header h1{font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#header p{font-size:11px;color:#aaa;margin-top:3px}
+.hdr-stats{font-size:11px;color:#ccc;margin-top:5px;font-variant-numeric:tabular-nums}
+.poi-icon{font-size:18px;text-align:center;line-height:24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));cursor:pointer;user-select:none}
+.map-btn{position:fixed;right:16px;z-index:1001;width:40px;height:40px;border-radius:50%;background:rgba(28,28,30,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 10px rgba(0,0,0,.5);user-select:none;-webkit-user-select:none}
+.map-btn:active{opacity:.7}
+#layers-btn{bottom:90px}
+#btn-locate{bottom:138px}
+#btn-3d{bottom:186px;font-size:11px;font-weight:700;letter-spacing:-.3px}
+#btn-compass{bottom:234px}
+#btn-compass svg{transition:none}
+#header-content{flex:1;min-width:0}
+#btn-trip{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;-webkit-tap-highlight-color:transparent}
+#btn-trip:active{opacity:.6}
+#layer-sheet{position:fixed;top:0;left:0;right:0;bottom:0;z-index:3000;display:none;align-items:flex-end}
+#layer-sheet.open{display:flex}
+#layer-sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+#layer-sheet-inner{position:relative;left:16px;right:16px;bottom:16px;width:calc(100% - 32px);background:#1c1c1e;border-radius:20px;padding-bottom:32px;max-height:70vh;overflow-y:auto}
+#layer-sheet-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+#layer-sheet-hdr span{font-size:15px;font-weight:600;color:#fff}
+#layer-sheet-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0}
+.layer-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.layer-lbl{display:flex;align-items:center;gap:10px;font-size:15px;color:#fff}
+.layer-emoji{font-size:18px;width:24px;text-align:center;line-height:1}
+.layer-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:51px;height:31px;background:#3a3a3c;border-radius:100px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;margin:0}
+.layer-row input[type=checkbox]:checked{background:#34c759}
+.layer-row input[type=checkbox]::after{content:'';position:absolute;width:27px;height:27px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.layer-row input[type=checkbox]:checked::after{left:22px}
+.mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo{display:none!important}
+.mapboxgl-popup-content{background:rgba(0,0,0,.82);color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+.mapboxgl-popup-tip{display:none}
+
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="header">
+  <div id="header-content"><h1>May 14 ・ El Paso → Truth or Consequences</h1><p class="hdr-stats">🚗 151.3 mi ・ 🥾 1.0 mi</p>
+  <p class="hdr-stats">😴 8 h</p></div>
+  <a id="btn-trip" href="../" title="All days"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+</div>
+<button id="btn-compass" class="map-btn" title="Reset North"><svg id="compass-svg" width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#555" stroke-width="1.5"/><polygon id="compass-n" points="12,3 9.5,12 12,10.5 14.5,12" fill="#ff3b30"/><polygon id="compass-s" points="12,21 9.5,12 12,13.5 14.5,12" fill="#fff"/></svg></button>
+<button id="btn-3d" class="map-btn" title="Toggle 3D">2D</button>
+<button id="btn-locate" class="map-btn" title="Fit route"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button>
+<button id="layers-btn" class="map-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5"/><polyline points="2 15.5 12 22 22 15.5"/><polyline points="2 12 12 18.5 22 12"/></svg></button>
+<div id="layer-sheet">
+  <div id="layer-sheet-backdrop"></div>
+  <div id="layer-sheet-inner">
+    <div id="layer-sheet-hdr"><span>Layers</span><button id="layer-sheet-close">✕</button></div>
+    <label class="layer-row"><span class="layer-lbl"><span style="display:inline-block;width:18px;height:3px;background:linear-gradient(to right,#29e664,#ff4628);border-radius:2px"></span><span>Route</span></span><input type="checkbox" id="chk-route" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🔥</span><span>Photo heatmap</span></span><input type="checkbox" id="chk-heat" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🥾</span><span>Hikes</span></span><input type="checkbox" id="chk-hikes" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🏠</span><span>Overnight</span></span><input type="checkbox" id="chk-poi-accommodation" checked></label>
+  </div>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZGVlbWlkcm9sbDEiLCJhIjoiY21vdTc3MzkwMGJsMDJybzh6emE0bmp5ZiJ9.iLaeJO-iEJ7DqjkW1ZmSfQ';
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/satellite-streets-v12',
+  bounds: [[-107.318794, 31.748993], [-106.393167, 33.191871]],
+  fitBoundsOptions: {padding:{top:90,right:40,bottom:110,left:40}},
+  attributionControl: false
+});
+
+const routeCoords = [[-106.394638, 31.794175], [-106.393669, 31.793614], [-106.393314, 31.792644], [-106.393167, 31.791723], [-106.394853, 31.791847], [-106.395727, 31.7915], [-106.395672, 31.789968], [-106.398121, 31.789512], [-106.401043, 31.789122], [-106.403354, 31.788819], [-106.407777, 31.788242], [-106.408798, 31.788064], [-106.410151, 31.787511], [-106.411971, 31.786364], [-106.413314, 31.785488], [-106.414185, 31.78501], [-106.416418, 31.784199], [-106.418008, 31.783794], [-106.41947, 31.782486], [-106.42013, 31.781759], [-106.42099, 31.78011], [-106.421957, 31.778075], [-106.423242, 31.777699], [-106.425841, 31.777509], [-106.44005, 31.777572], [-106.44692, 31.777656], [-106.450021, 31.778148], [-106.454033, 31.778428], [-106.45623, 31.778643], [-106.460707, 31.778674], [-106.461476, 31.779476], [-106.46147, 31.780616], [-106.461462, 31.781348], [-106.461449, 31.782732], [-106.461444, 31.783823], [-106.461395, 31.784834], [-106.461456, 31.786142], [-106.461441, 31.788192], [-106.461436, 31.791731], [-106.465342, 31.792283], [-106.469647, 31.792331], [-106.471558, 31.792031], [-106.472211, 31.791671], [-106.472887, 31.791552], [-106.473353, 31.790855], [-106.473734, 31.790014], [-106.473987, 31.78924], [-106.474884, 31.788982], [-106.475009, 31.788208], [-106.475481, 31.787498], [-106.475808, 31.786578], [-106.476678, 31.785366], [-106.477903, 31.784632], [-106.478578, 31.783535], [-106.479435, 31.782923], [-106.480282, 31.782548], [-106.480549, 31.782593], [-106.481496, 31.783743], [-106.482079, 31.783961], [-106.482351, 31.784136], [-106.482466, 31.784414], [-106.482359, 31.784915], [-106.482539, 31.78509], [-106.482904, 31.785285], [-106.483091, 31.785708], [-106.483579, 31.786013], [-106.483856, 31.785733], [-106.484187, 31.785421], [-106.484527, 31.785416], [-106.484823, 31.785683], [-106.48556, 31.786148], [-106.486229, 31.786303], [-106.486547, 31.785077], [-106.487359, 31.783351], [-106.487833, 31.782887], [-106.489117, 31.781534], [-106.48955, 31.781242], [-106.490364, 31.781118], [-106.491367, 31.780302], [-106.49177, 31.779752], [-106.491619, 31.778902], [-106.491678, 31.778271], [-106.491709, 31.775414], [-106.492843, 31.774412], [-106.493733, 31.773933], [-106.49387, 31.773855], [-106.49383, 31.773663], [-106.494435, 31.772133], [-106.495667, 31.771501], [-106.495918, 31.770238], [-106.49441, 31.770077], [-106.491279, 31.766518], [-106.490525, 31.765662], [-106.489366, 31.764342], [-106.488164, 31.76299], [-106.487325, 31.762039], [-106.486461, 31.761073], [-106.485412, 31.759969], [-106.484768, 31.759097], [-106.484681, 31.758178], [-106.484057, 31.756137], [-106.483209, 31.753466], [-106.482429, 31.750919], [-106.481376, 31.751048], [-106.481581, 31.749726], [-106.485101, 31.748993], [-106.485477, 31.750231], [-106.485935, 31.751909], [-106.483466, 31.752474], [-106.482178, 31.753645], [-106.482986, 31.756223], [-106.481124, 31.756804], [-106.479985, 31.757192], [-106.478958, 31.757852], [-106.478167, 31.758368], [-106.476143, 31.758894], [-106.472765, 31.759711], [-106.470968, 31.760186], [-106.470161, 31.760777], [-106.467818, 31.763226], [-106.46635, 31.764135], [-106.463508, 31.765423], [-106.46192, 31.766177], [-106.459209, 31.767469], [-106.45814, 31.767981], [-106.455063, 31.76935], [-106.453251, 31.769642], [-106.451596, 31.769477], [-106.449117, 31.768676], [-106.446521, 31.767932], [-106.446443, 31.769933], [-106.444536, 31.77457], [-106.442344, 31.777446], [-106.441234, 31.779849], [-106.441081, 31.793078], [-106.441092, 31.800129], [-106.442109, 31.804139], [-106.442229, 31.805181], [-106.442134, 31.808122], [-106.4417, 31.812053], [-106.440838, 31.816342], [-106.438948, 31.820504], [-106.437681, 31.822745], [-106.437615, 31.824704], [-106.439237, 31.82916], [-106.43953, 31.833074], [-106.43992, 31.845453], [-106.440199, 31.852198], [-106.440467, 31.863994], [-106.440721, 31.873752], [-106.440925, 31.882544], [-106.440516, 31.88751], [-106.440689, 31.894223], [-106.440808, 31.898418], [-106.443191, 31.898991], [-106.448654, 31.902413], [-106.448377, 31.902882], [-106.448409, 31.903676], [-106.448441, 31.902845], [-106.450723, 31.903795], [-106.452871, 31.904429], [-106.454506, 31.904245], [-106.455587, 31.903726], [-106.456417, 31.902937], [-106.45688, 31.90202], [-106.456991, 31.901114], [-106.456456, 31.898634], [-106.456298, 31.897558], [-106.456537, 31.896531], [-106.458192, 31.894524], [-106.460295, 31.892914], [-106.462315, 31.892696], [-106.466488, 31.894285], [-106.471039, 31.894038], [-106.475781, 31.893528], [-106.490903, 31.881386], [-106.493924, 31.878178], [-106.500131, 31.880073], [-106.495899, 31.877953], [-106.493493, 31.878054], [-106.495653, 31.878102], [-106.503097, 31.882824], [-106.508682, 31.890463], [-106.514207, 31.895924], [-106.520957, 31.904242], [-106.522624, 31.906221], [-106.524001, 31.907103], [-106.525802, 31.907695], [-106.531987, 31.907464], [-106.537168, 31.906869], [-106.541959, 31.905403], [-106.545386, 31.904891], [-106.55703, 31.905786], [-106.566009, 31.907445], [-106.57623, 31.908338], [-106.581978, 31.908539], [-106.582214, 31.910117], [-106.582379, 31.915798], [-106.582748, 31.928862], [-106.582763, 31.938078], [-106.582655, 31.946871], [-106.582648, 31.956639], [-106.582659, 31.975869], [-106.582651, 31.993756], [-106.582802, 32.010766], [-106.591229, 32.031033], [-106.601065, 32.053536], [-106.627866, 32.104594], [-106.642409, 32.132156], [-106.648371, 32.143569], [-106.671599, 32.176646], [-106.723206, 32.248533], [-106.728736, 32.256929], [-106.730815, 32.263236], [-106.731298, 32.264719], [-106.73178, 32.266203], [-106.732259, 32.267686], [-106.734252, 32.27388], [-106.737061, 32.282503], [-106.744277, 32.304819], [-106.750131, 32.320031], [-106.767894, 32.345647], [-106.776345, 32.357812], [-106.78036, 32.362392], [-106.792703, 32.374973], [-106.808018, 32.390629], [-106.820189, 32.405326], [-106.826952, 32.412579], [-106.869842, 32.447955], [-106.877601, 32.457486], [-106.898813, 32.487565], [-106.901196, 32.494843], [-106.912765, 32.533896], [-106.921168, 32.550523], [-106.935387, 32.577713], [-106.945275, 32.597347], [-106.955204, 32.615629], [-106.99508, 32.660773], [-107.005761, 32.66993], [-107.012817, 32.671805], [-107.030935, 32.672346], [-107.046923, 32.674344], [-107.065448, 32.677536], [-107.098778, 32.676032], [-107.118321, 32.67881], [-107.140224, 32.682491], [-107.146205, 32.683032], [-107.174235, 32.686411], [-107.177049, 32.687206], [-107.183664, 32.693398], [-107.203826, 32.721658], [-107.210906, 32.729092], [-107.232794, 32.750927], [-107.242664, 32.764411], [-107.259052, 32.780131], [-107.271299, 32.791246], [-107.279292, 32.797945], [-107.282454, 32.800744], [-107.284824, 32.804657], [-107.287609, 32.810677], [-107.289151, 32.814503], [-107.289197, 32.822487], [-107.288821, 32.834832], [-107.288419, 32.841185], [-107.287531, 32.849223], [-107.287134, 32.854816], [-107.287909, 32.85831], [-107.290492, 32.866067], [-107.292643, 32.872738], [-107.295257, 32.877544], [-107.308389, 32.892041], [-107.316277, 32.900883], [-107.317718, 32.90329], [-107.318664, 32.907291], [-107.318794, 32.923519], [-107.315491, 32.938553], [-107.314705, 32.942585], [-107.314917, 32.948334], [-107.315353, 32.955985], [-107.315136, 32.962064], [-107.31443, 32.969077], [-107.313205, 32.978878], [-107.313026, 32.983561], [-107.314619, 32.988584], [-107.317926, 32.997281], [-107.318391, 33.001363], [-107.317762, 33.005835], [-107.315216, 33.021064], [-107.31242, 33.037768], [-107.309883, 33.049271], [-107.309055, 33.055484], [-107.308391, 33.067484], [-107.307921, 33.076104], [-107.30743, 33.085111], [-107.307, 33.09099], [-107.305079, 33.096469], [-107.301574, 33.105028], [-107.299157, 33.111005], [-107.29806, 33.117124], [-107.297126, 33.11976], [-107.295322, 33.121873], [-107.290375, 33.125116], [-107.282595, 33.130084], [-107.27514, 33.134843], [-107.258975, 33.146934], [-107.254904, 33.15033], [-107.253655, 33.152419], [-107.252824, 33.155608], [-107.25209, 33.156956], [-107.250895, 33.156597], [-107.24959, 33.155153], [-107.251353, 33.156153], [-107.250794, 33.155894], [-107.251867, 33.155363], [-107.251684, 33.154437], [-107.251034, 33.154026], [-107.250003, 33.154797], [-107.248584, 33.154689], [-107.247311, 33.153908], [-107.247094, 33.153557], [-107.246559, 33.153423], [-107.246327, 33.153845], [-107.245926, 33.154553], [-107.245584, 33.157528], [-107.244658, 33.15911], [-107.242316, 33.161091], [-107.239182, 33.163668], [-107.238154, 33.16585], [-107.23877, 33.169552], [-107.23915, 33.172926], [-107.237898, 33.173516], [-107.236063, 33.177443], [-107.234297, 33.178312], [-107.230981, 33.179482], [-107.224791, 33.183097], [-107.220973, 33.185317], [-107.219557, 33.186363], [-107.217666, 33.185677], [-107.216388, 33.18491], [-107.215636, 33.183747], [-107.213342, 33.182933], [-107.211086, 33.182311], [-107.210426, 33.182421], [-107.209417, 33.182078], [-107.20869, 33.18174], [-107.208126, 33.181216], [-107.207525, 33.181649], [-107.206953, 33.182208], [-107.205313, 33.184686], [-107.203394, 33.187492], [-107.20138, 33.189873], [-107.19953, 33.191149], [-107.197176, 33.191871], [-107.1987, 33.191535], [-107.200424, 33.190596], [-107.202484, 33.188769], [-107.204589, 33.186004], [-107.206419, 33.182677], [-107.207322, 33.182024], [-107.208186, 33.182103], [-107.210432, 33.18256], [-107.211273, 33.182393], [-107.213912, 33.183025], [-107.21579, 33.183884], [-107.216532, 33.185048], [-107.217911, 33.185801], [-107.219632, 33.186224], [-107.221409, 33.185055], [-107.225593, 33.182627], [-107.231168, 33.17938], [-107.234847, 33.178149], [-107.236274, 33.177198], [-107.238033, 33.173368], [-107.239426, 33.172887], [-107.238622, 33.168849], [-107.238206, 33.16551], [-107.239607, 33.1633], [-107.242941, 33.160592], [-107.244842, 33.158877], [-107.245682, 33.157246], [-107.245971, 33.154648], [-107.246408, 33.153888], [-107.246909, 33.15383], [-107.247777, 33.154188], [-107.249084, 33.155584], [-107.24871, 33.155531]];
+
+const poiGroups = {};
+const hikeMarkers = [];
+
+poiGroups['accommodation']=[];
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🏠';poiGroups['accommodation'].push(new mapboxgl.Marker({element:el}).setLngLat([-106.395,31.794]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>El Paso — старт</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🏠';poiGroups['accommodation'].push(new mapboxgl.Marker({element:el}).setLngLat([-107.2488,33.15564]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Comfort Inn & Suites near Spaceport</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🥾';hikeMarkers.push(new mapboxgl.Marker({element:el}).setLngLat([-107.188084,33.190941]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>▶ Rattlesnake Island</b><br>1.56 km')).addTo(map));})();
+function _tlPadBottom(){var _tl=document.getElementById('tl');if(!_tl)return 110;var _h=_tl.offsetHeight+20;var _vw=_tl.querySelector('.tl-vw');if(_vw){_h+=_tl.offsetWidth*9/16+8;}return Math.round(_h);}
+
+map.on('load', () => {
+  map.addSource('mapbox-dem', {
+    type: 'raster-dem',
+    url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+    tileSize: 512, maxzoom: 14
+  });
+  map.setTerrain({source:'mapbox-dem', exaggeration:1.5});
+
+  map.addSource('route', {
+    type: 'geojson', lineMetrics: true,
+    data: {type:'Feature',geometry:{type:'LineString',coordinates:routeCoords}}
+  });
+  map.addLayer({
+    id:'route-casing', type:'line', source:'route',
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{'line-width':7,'line-opacity':0.6,'line-color':'#000'}
+  });
+  map.addLayer({
+    id:'route', type:'line', source:'route',
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{'line-width':4,'line-opacity':1,
+      'line-gradient':['interpolate',['linear'],['line-progress'],0,'#29e664',1,'#ff4628']}
+  });
+
+  map.addSource('pos',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[0,0]}}});
+  map.addLayer({id:'pos-halo',type:'circle',source:'pos',paint:{'circle-radius':18,'circle-color':'#4a9eff','circle-opacity':0.18,'circle-stroke-width':0}});
+  map.addLayer({id:'pos-dot', type:'circle',source:'pos',paint:{'circle-radius':7,'circle-color':'#fff','circle-stroke-width':2.5,'circle-stroke-color':'#4a9eff'}});
+
+  const ALL_PHOTOS=[{"type": "Feature", "geometry": {"type": "Point", "coordinates": [-106.478, 31.891]}, "properties": {"t": 826}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-106.5633, 31.9072]}, "properties": {"t": 833}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-106.5808, 31.8864]}, "properties": {"t": 838}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-106.8471, 32.4292]}, "properties": {"t": 1084}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-107.3188, 32.92]}, "properties": {"t": 1123}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-107.1886, 33.1906]}, "properties": {"t": 1190}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-107.1875, 33.1928]}, "properties": {"t": 1200}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-107.1875, 33.1956]}, "properties": {"t": 1207}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-107.1889, 33.1939]}, "properties": {"t": 1216}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-107.2486, 33.1557]}, "properties": {"t": 1249}}];
+  map.addSource('photos',{type:'geojson',data:{type:'FeatureCollection',features:ALL_PHOTOS}});
+  map.addLayer({id:'photo-heat',type:'heatmap',source:'photos',paint:{'heatmap-radius':30,'heatmap-opacity':0.65,'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.05,'rgba(103,169,207,0.5)',0.5,'rgba(254,224,144,0.75)',0.8,'rgba(252,141,89,0.88)',1,'rgba(215,48,31,0.95)']}});
+  map.addSource('hike-0',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
+  map.addLayer({id:'hike-0-casing',type:'line',source:'hike-0',layout:{'line-cap':'round','line-join':'round','visibility':'none'},paint:{'line-color':'#ffffff','line-width':5.5,'line-opacity':0.9}});
+  map.addLayer({id:'hike-0',type:'line',source:'hike-0',layout:{'line-cap':'round','line-join':'round','visibility':'none'},paint:{'line-color':'rgb(233,95,42)','line-width':3.5,'line-opacity':1}});
+
+  if (routeCoords.length > 0) {
+    const bounds = routeCoords.reduce(
+      (b,c) => b.extend(c),
+      new mapboxgl.LngLatBounds(routeCoords[0], routeCoords[0])
+    );
+    window._mapBounds = bounds;
+    map.fitBounds(bounds,{padding:{top:90,right:40,bottom:_tlPadBottom(),left:40},duration:0});
+  } else {
+    window._mapBounds = map.getBounds();
+  }
+
+  map.on('rotate', function() {
+    var b = map.getBearing();
+    document.getElementById('compass-svg').style.transform = 'rotate('+(-b)+'deg)';
+  });
+
+  
+  if(typeof window.tlSync==='function')window.tlSync();else if(typeof window.tlUpdate==='function')window.tlUpdate(0);
+
+  document.getElementById('chk-route').addEventListener('change',e=>{['route','route-casing'].forEach(id=>map.setLayoutProperty(id,'visibility',e.target.checked?'visible':'none'));});
+  document.getElementById('chk-heat').addEventListener('change',e=>map.setLayoutProperty('photo-heat','visibility',e.target.checked?'visible':'none'));
+  document.getElementById('chk-hikes').addEventListener('change',e=>{["hike-0-casing", "hike-0"].forEach(id=>map.setLayoutProperty(id,'visibility',e.target.checked?'visible':'none'));hikeMarkers.forEach(m=>m.getElement().style.display=e.target.checked?'':'none');});
+  document.getElementById('chk-poi-accommodation').addEventListener('change',e=>(poiGroups['accommodation']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+});
+var _lb=document.getElementById('layers-btn'),_ls=document.getElementById('layer-sheet'),_lc=document.getElementById('layer-sheet-close'),_lbd=document.getElementById('layer-sheet-backdrop');
+_lb.addEventListener('click',function(e){e.stopPropagation();_ls.classList.toggle('open');});
+_lc.addEventListener('click',function(){_ls.classList.remove('open');});
+_lbd.addEventListener('click',function(){_ls.classList.remove('open');});
+document.getElementById('btn-compass').addEventListener('click',function(){map.easeTo({bearing:0,duration:300});});
+map.on('pitch',function(){document.getElementById('btn-3d').textContent=map.getPitch()>5?'3D':'2D';});
+document.getElementById('btn-3d').addEventListener('click',function(){map.easeTo({pitch:map.getPitch()>5?0:60,duration:500});});
+document.getElementById('btn-locate').addEventListener('click',function(){map.fitBounds(window._mapBounds,{padding:{top:90,right:40,bottom:_tlPadBottom(),left:40},duration:500});});
+</script>
+<script>
+document.addEventListener('gesturestart',function(e){e.preventDefault();},false);
+document.addEventListener('touchmove',function(e){if(e.scale!==undefined&&e.scale!==1)e.preventDefault();},{passive:false});
+(function(){var _lt=0;document.addEventListener('touchend',function(e){var now=Date.now();if(now-_lt<300)e.preventDefault();_lt=now;},{passive:false});})();
+</script>
+</body>
+</html>

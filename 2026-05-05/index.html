@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>May 5 — Terlingua → Carlsbad NM</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{overflow:hidden}
+body{background:#111;font-family:-apple-system,BlinkMacSystemFont,sans-serif;color:#fff}
+#map{position:absolute;top:0;bottom:0;width:100%;z-index:0}
+#header{position:fixed;top:12px;left:50%;transform:translateX(-50%);width:calc(100% - 32px);max-width:520px;z-index:1000;background:rgba(28,28,30,.88);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);padding:10px 14px;border-radius:18px;box-shadow:0 4px 24px rgba(0,0,0,.5);display:flex;align-items:center;gap:10px}
+#header h1{font-size:13px;font-weight:700;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#header p{font-size:11px;color:#aaa;margin-top:3px}
+.hdr-stats{font-size:11px;color:#ccc;margin-top:5px;font-variant-numeric:tabular-nums}
+.poi-icon{font-size:18px;text-align:center;line-height:24px;filter:drop-shadow(0 1px 2px rgba(0,0,0,.8));cursor:pointer;user-select:none}
+.map-btn{position:fixed;right:16px;z-index:1001;width:40px;height:40px;border-radius:50%;background:rgba(28,28,30,.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:none;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0;box-shadow:0 2px 10px rgba(0,0,0,.5);user-select:none;-webkit-user-select:none}
+.map-btn:active{opacity:.7}
+#layers-btn{bottom:90px}
+#btn-locate{bottom:138px}
+#btn-3d{bottom:186px;font-size:11px;font-weight:700;letter-spacing:-.3px}
+#btn-compass{bottom:234px}
+#btn-compass svg{transition:none}
+#header-content{flex:1;min-width:0}
+#btn-trip{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.12);color:#fff;display:flex;align-items:center;justify-content:center;text-decoration:none;-webkit-tap-highlight-color:transparent}
+#btn-trip:active{opacity:.6}
+#layer-sheet{position:fixed;top:0;left:0;right:0;bottom:0;z-index:3000;display:none;align-items:flex-end}
+#layer-sheet.open{display:flex}
+#layer-sheet-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.4)}
+#layer-sheet-inner{position:relative;left:16px;right:16px;bottom:16px;width:calc(100% - 32px);background:#1c1c1e;border-radius:20px;padding-bottom:32px;max-height:70vh;overflow-y:auto}
+#layer-sheet-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 20px 12px;border-bottom:1px solid rgba(255,255,255,.1)}
+#layer-sheet-hdr span{font-size:15px;font-weight:600;color:#fff}
+#layer-sheet-close{background:rgba(255,255,255,.15);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;padding:0}
+.layer-row{display:flex;align-items:center;justify-content:space-between;padding:13px 20px;border-bottom:1px solid rgba(255,255,255,.07);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.layer-lbl{display:flex;align-items:center;gap:10px;font-size:15px;color:#fff}
+.layer-emoji{font-size:18px;width:24px;text-align:center;line-height:1}
+.layer-row input[type=checkbox]{appearance:none;-webkit-appearance:none;width:51px;height:31px;background:#3a3a3c;border-radius:100px;position:relative;cursor:pointer;transition:background .2s;flex-shrink:0;margin:0}
+.layer-row input[type=checkbox]:checked{background:#34c759}
+.layer-row input[type=checkbox]::after{content:'';position:absolute;width:27px;height:27px;background:#fff;border-radius:50%;top:2px;left:2px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+.layer-row input[type=checkbox]:checked::after{left:22px}
+.mapboxgl-ctrl-bottom-right,.mapboxgl-ctrl-bottom-left,.mapboxgl-ctrl-logo{display:none!important}
+.mapboxgl-popup-content{background:rgba(0,0,0,.82);color:#fff;border-radius:8px;padding:8px 12px;font-size:13px;font-family:-apple-system,BlinkMacSystemFont,sans-serif;box-shadow:0 2px 12px rgba(0,0,0,.5)}
+.mapboxgl-popup-tip{display:none}
+
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="header">
+  <div id="header-content"><h1>May 5 ・ Terlingua → Carlsbad NM</h1><p class="hdr-stats">🚗 265.8 mi</p>
+  <p class="hdr-stats">⚡️ +65.52 / -81.8 kWh ・ 😴 6.1 h</p></div>
+  <a id="btn-trip" href="../" title="All days"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+</div>
+<button id="btn-compass" class="map-btn" title="Reset North"><svg id="compass-svg" width="22" height="22" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="#555" stroke-width="1.5"/><polygon id="compass-n" points="12,3 9.5,12 12,10.5 14.5,12" fill="#ff3b30"/><polygon id="compass-s" points="12,21 9.5,12 12,13.5 14.5,12" fill="#fff"/></svg></button>
+<button id="btn-3d" class="map-btn" title="Toggle 3D">2D</button>
+<button id="btn-locate" class="map-btn" title="Fit route"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><line x1="12" y1="2" x2="12" y2="6"/><line x1="12" y1="18" x2="12" y2="22"/><line x1="2" y1="12" x2="6" y2="12"/><line x1="18" y1="12" x2="22" y2="12"/></svg></button>
+<button id="layers-btn" class="map-btn"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 22 8.5 12 15 2 8.5"/><polyline points="2 15.5 12 22 22 15.5"/><polyline points="2 12 12 18.5 22 12"/></svg></button>
+<div id="layer-sheet">
+  <div id="layer-sheet-backdrop"></div>
+  <div id="layer-sheet-inner">
+    <div id="layer-sheet-hdr"><span>Layers</span><button id="layer-sheet-close">✕</button></div>
+    <label class="layer-row"><span class="layer-lbl"><span style="display:inline-block;width:18px;height:3px;background:linear-gradient(to right,#29e664,#ff4628);border-radius:2px"></span><span>Route</span></span><input type="checkbox" id="chk-route" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🔥</span><span>Photo heatmap</span></span><input type="checkbox" id="chk-heat" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🛂</span><span>Border control</span></span><input type="checkbox" id="chk-poi-border" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🚪</span><span>Check out</span></span><input type="checkbox" id="chk-poi-checkout" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">👨‍💻</span><span>Work</span></span><input type="checkbox" id="chk-poi-work" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🍽️</span><span>Food</span></span><input type="checkbox" id="chk-poi-food" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">💦</span><span>Car wash</span></span><input type="checkbox" id="chk-poi-carwash" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🚔</span><span>Speeding ticket</span></span><input type="checkbox" id="chk-poi-ticket" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">🏠</span><span>Check in</span></span><input type="checkbox" id="chk-poi-checkin" checked></label>
+  <label class="layer-row"><span class="layer-lbl"><span class="layer-emoji">⚡️</span><span>Charging</span></span><input type="checkbox" id="chk-poi-charging" checked></label>
+  </div>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZGVlbWlkcm9sbDEiLCJhIjoiY21vdTc3MzkwMGJsMDJybzh6emE0bmp5ZiJ9.iLaeJO-iEJ7DqjkW1ZmSfQ';
+const map = new mapboxgl.Map({
+  container: 'map',
+  style: 'mapbox://styles/mapbox/satellite-streets-v12',
+  bounds: [[-104.23139, 29.32614], [-103.48385, 32.39016]],
+  fitBoundsOptions: {padding:{top:90,right:40,bottom:110,left:40}},
+  attributionControl: false
+});
+
+const routeCoords = [[-103.57214, 29.32708], [-103.5623, 29.32614], [-103.55023, 29.32714], [-103.53802, 29.32854], [-103.53411, 29.331], [-103.53075, 29.34332], [-103.52758, 29.35674], [-103.52119, 29.37135], [-103.51678, 29.38456], [-103.51484, 29.3967], [-103.50832, 29.40862], [-103.50795, 29.42158], [-103.5061, 29.43396], [-103.51213, 29.44679], [-103.51756, 29.46139], [-103.52783, 29.47203], [-103.53091, 29.48582], [-103.53541, 29.49739], [-103.53818, 29.51146], [-103.5416, 29.52721], [-103.54452, 29.54238], [-103.54704, 29.55388], [-103.55066, 29.56494], [-103.55648, 29.58008], [-103.56084, 29.59308], [-103.56489, 29.60808], [-103.57593, 29.62852], [-103.58239, 29.65035], [-103.58847, 29.67169], [-103.58758, 29.68872], [-103.58049, 29.70043], [-103.5706, 29.71615], [-103.56237, 29.73528], [-103.56788, 29.75144], [-103.5779, 29.76681], [-103.57864, 29.78116], [-103.576, 29.79898], [-103.57652, 29.82377], [-103.57699, 29.84616], [-103.57734, 29.86335], [-103.58014, 29.88165], [-103.58176, 29.90099], [-103.58193, 29.92581], [-103.58206, 29.94448], [-103.57845, 29.96155], [-103.57169, 29.9787], [-103.57193, 29.99764], [-103.57458, 30.01346], [-103.57356, 30.02801], [-103.57159, 30.04156], [-103.5792, 30.05278], [-103.58422, 30.06324], [-103.59304, 30.07148], [-103.59441, 30.08621], [-103.59635, 30.09854], [-103.58918, 30.1107], [-103.58029, 30.12351], [-103.57954, 30.13795], [-103.58397, 30.15074], [-103.57943, 30.1621], [-103.583, 30.17041], [-103.58313, 30.18143], [-103.58059, 30.19442], [-103.57952, 30.1987], [-103.57331, 30.20997], [-103.56687, 30.22497], [-103.56832, 30.24015], [-103.5679, 30.25253], [-103.57962, 30.25824], [-103.5861, 30.2698], [-103.58582, 30.28182], [-103.59483, 30.29035], [-103.59999, 30.29883], [-103.60203, 30.30428], [-103.61329, 30.30854], [-103.62458, 30.31484], [-103.62918, 30.32704], [-103.63775, 30.33583], [-103.64711, 30.34332], [-103.65148, 30.35233], [-103.65282, 30.35703], [-103.65346, 30.35705], [-103.65289, 30.35677], [-103.65461, 30.35936], [-103.6571, 30.35989], [-103.66149, 30.35854], [-103.66685, 30.35697], [-103.67023, 30.35497], [-103.66905, 30.35517], [-103.6666, 30.35605], [-103.66072, 30.35782], [-103.65483, 30.35959], [-103.65277, 30.35654], [-103.65271, 30.35682], [-103.65305, 30.35684], [-103.65395, 30.35737], [-103.65502, 30.36037], [-103.66011, 30.35902], [-103.6624, 30.36027], [-103.66454, 30.36498], [-103.66744, 30.3721], [-103.66934, 30.37922], [-103.6756, 30.38949], [-103.68274, 30.40117], [-103.68996, 30.41304], [-103.69694, 30.4244], [-103.70397, 30.43579], [-103.71163, 30.44829], [-103.71905, 30.46041], [-103.72719, 30.47268], [-103.73959, 30.48279], [-103.75057, 30.4948], [-103.75177, 30.50899], [-103.765, 30.5179], [-103.77874, 30.52748], [-103.78974, 30.53595], [-103.80509, 30.53479], [-103.8186, 30.52695], [-103.8352, 30.52781], [-103.8475, 30.53294], [-103.85538, 30.54363], [-103.86509, 30.55387], [-103.87194, 30.56582], [-103.88027, 30.57701], [-103.89045, 30.58514], [-103.89368, 30.58971], [-103.88669, 30.5967], [-103.88542, 30.60522], [-103.87302, 30.61322], [-103.86456, 30.62624], [-103.85377, 30.63575], [-103.84499, 30.64314], [-103.83505, 30.65016], [-103.82243, 30.6453], [-103.80904, 30.64972], [-103.80541, 30.65727], [-103.79297, 30.65951], [-103.79449, 30.67025], [-103.79296, 30.68089], [-103.78977, 30.69103], [-103.7849, 30.70167], [-103.78278, 30.7141], [-103.78557, 30.72855], [-103.77409, 30.73788], [-103.76555, 30.75337], [-103.75675, 30.76868], [-103.74494, 30.77713], [-103.73663, 30.78753], [-103.74896, 30.80305], [-103.76163, 30.81424], [-103.77382, 30.82645], [-103.79977, 30.84699], [-103.80294, 30.85842], [-103.79467, 30.87015], [-103.79402, 30.88461], [-103.79084, 30.89819], [-103.79113, 30.9128], [-103.79151, 30.92992], [-103.79069, 30.94378], [-103.77668, 30.94966], [-103.76858, 30.96159], [-103.76344, 30.97502], [-103.75039, 30.98369], [-103.74022, 30.98848], [-103.72758, 30.99315], [-103.71212, 30.99694], [-103.69717, 31.00008], [-103.6777, 30.99653], [-103.66248, 30.99311], [-103.65924, 31.00461], [-103.65532, 31.02041], [-103.65156, 31.03545], [-103.6515, 31.04845], [-103.6359, 31.05712], [-103.61998, 31.06598], [-103.60519, 31.08109], [-103.60114, 31.09724], [-103.59688, 31.11426], [-103.59305, 31.12954], [-103.58881, 31.14645], [-103.58432, 31.16437], [-103.58045, 31.17983], [-103.57654, 31.1954], [-103.57262, 31.21095], [-103.56868, 31.22659], [-103.56471, 31.24232], [-103.56066, 31.25838], [-103.5564, 31.27524], [-103.55247, 31.29082], [-103.54848, 31.30662], [-103.54405, 31.32394], [-103.53432, 31.34473], [-103.53033, 31.36193], [-103.52686, 31.37698], [-103.52408, 31.38906], [-103.52194, 31.398], [-103.51143, 31.39727], [-103.50398, 31.39603], [-103.49754, 31.39618], [-103.48651, 31.40019], [-103.48681, 31.40036], [-103.49132, 31.39813], [-103.50216, 31.39663], [-103.49653, 31.39639], [-103.48647, 31.40021], [-103.48385, 31.4034], [-103.48655, 31.4092], [-103.49042, 31.41749], [-103.49346, 31.42402], [-103.49586, 31.42907], [-103.49986, 31.43765], [-103.50618, 31.45112], [-103.51309, 31.4644], [-103.52134, 31.47638], [-103.53159, 31.48609], [-103.54162, 31.49986], [-103.55124, 31.51305], [-103.56153, 31.52715], [-103.57038, 31.53928], [-103.57912, 31.55129], [-103.58982, 31.56592], [-103.60025, 31.58021], [-103.61034, 31.59401], [-103.62055, 31.60797], [-103.63051, 31.62159], [-103.63965, 31.63405], [-103.65218, 31.64187], [-103.66986, 31.6471], [-103.68795, 31.65245], [-103.70591, 31.65776], [-103.72361, 31.66299], [-103.74466, 31.66919], [-103.76329, 31.67468], [-103.78168, 31.68032], [-103.79401, 31.69213], [-103.8048, 31.70464], [-103.81461, 31.71603], [-103.8252, 31.72833], [-103.83542, 31.74016], [-103.84546, 31.75176], [-103.85568, 31.76363], [-103.86691, 31.7766], [-103.87769, 31.78908], [-103.88874, 31.80188], [-103.90071, 31.81574], [-103.90881, 31.8251], [-103.91661, 31.83454], [-103.92404, 31.84529], [-103.93173, 31.85635], [-103.94143, 31.87038], [-103.94994, 31.88276], [-103.95912, 31.89604], [-103.96829, 31.9093], [-103.97711, 31.92201], [-103.98634, 31.93534], [-103.99579, 31.94896], [-104.00446, 31.96146], [-104.01376, 31.97489], [-104.02245, 31.98742], [-104.03117, 32.00003], [-104.04284, 32.01177], [-104.05336, 32.02176], [-104.0608, 32.03332], [-104.06318, 32.0471], [-104.06579, 32.0621], [-104.06843, 32.07729], [-104.07099, 32.0912], [-104.07301, 32.1058], [-104.07324, 32.12078], [-104.07347, 32.136], [-104.07372, 32.14961], [-104.0722, 32.16494], [-104.06699, 32.18233], [-104.06522, 32.19682], [-104.06924, 32.21148], [-104.07212, 32.22527], [-104.07947, 32.23501], [-104.08803, 32.24645], [-104.08767, 32.25979], [-104.09954, 32.27006], [-104.10095, 32.2841], [-104.1007, 32.28652], [-104.10094, 32.29033], [-104.10616, 32.29924], [-104.11697, 32.30857], [-104.12828, 32.31774], [-104.1403, 32.3275], [-104.15211, 32.33706], [-104.164, 32.34669], [-104.17593, 32.35637], [-104.18782, 32.366], [-104.20081, 32.37653], [-104.2129, 32.3863], [-104.21939, 32.39016], [-104.22118, 32.38728], [-104.22506, 32.38156], [-104.2296, 32.3748], [-104.23063, 32.37388], [-104.23139, 32.37369]];
+
+const poiGroups = {};
+const hikeMarkers = [];
+
+poiGroups['border']=[];
+poiGroups['checkout']=[];
+poiGroups['work']=[];
+poiGroups['food']=[];
+poiGroups['carwash']=[];
+poiGroups['ticket']=[];
+poiGroups['checkin']=[];
+poiGroups['charging']=[];
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🛂';poiGroups['border'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.5796,30.1985]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Border control</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🚪';poiGroups['checkout'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.5727,29.3282]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Airbnb Terlingua (start)</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='👨‍💻';poiGroups['work'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.5727,29.3282]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Work — Airbnb Terlingua</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='👨‍💻';poiGroups['work'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.6532,30.3568]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Work — Tesla Supercharger Alpine</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🍽️';poiGroups['food'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.6531,30.3568]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Lunch — Alpine</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='💦';poiGroups['carwash'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.6685,30.3554]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Desert Rain Car Wash</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🚔';poiGroups['ticket'].push(new mapboxgl.Marker({element:el}).setLngLat([-104.1009,32.2795]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Speeding ticket — US-285 NM</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='🏠';poiGroups['checkin'].push(new mapboxgl.Marker({element:el}).setLngLat([-104.2313,32.3734]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Sleep Inn — Carlsbad NM</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='⚡️';poiGroups['charging'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.57274,29.3282]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Tesla SC +1 kWh</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='⚡️';poiGroups['charging'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.65321,30.35681]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Tesla SC +30 kWh</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='⚡️';poiGroups['charging'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.65305,30.35684]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Tesla SC +10 kWh</b>')).addTo(map));})();
+(()=>{const el=document.createElement('div');el.className='poi-icon';el.textContent='⚡️';poiGroups['charging'].push(new mapboxgl.Marker({element:el}).setLngLat([-103.48689,31.4004]).setPopup(new mapboxgl.Popup({closeButton:false,offset:12}).setHTML('<b>Tesla SC +24 kWh</b>')).addTo(map));})();
+
+function _tlPadBottom(){var _tl=document.getElementById('tl');if(!_tl)return 110;var _h=_tl.offsetHeight+20;return Math.round(_h);}
+
+map.on('load', () => {
+  map.addSource('mapbox-dem', {
+    type: 'raster-dem',
+    url: 'mapbox://mapbox.mapbox-terrain-dem-v1',
+    tileSize: 512, maxzoom: 14
+  });
+  map.setTerrain({source:'mapbox-dem', exaggeration:1.5});
+
+  map.addSource('route', {
+    type: 'geojson', lineMetrics: true,
+    data: {type:'Feature',geometry:{type:'LineString',coordinates:routeCoords}}
+  });
+  map.addLayer({
+    id:'route-casing', type:'line', source:'route',
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{'line-width':7,'line-opacity':0.6,'line-color':'#000'}
+  });
+  map.addLayer({
+    id:'route', type:'line', source:'route',
+    layout:{'line-cap':'round','line-join':'round'},
+    paint:{'line-width':4,'line-opacity':1,
+      'line-gradient':['interpolate',['linear'],['line-progress'],0,'#29e664',1,'#ff4628']}
+  });
+
+  map.addSource('pos',{type:'geojson',data:{type:'Feature',geometry:{type:'Point',coordinates:[0,0]}}});
+  map.addLayer({id:'pos-halo',type:'circle',source:'pos',paint:{'circle-radius':18,'circle-color':'#4a9eff','circle-opacity':0.18,'circle-stroke-width':0}});
+  map.addLayer({id:'pos-dot', type:'circle',source:'pos',paint:{'circle-radius':7,'circle-color':'#fff','circle-stroke-width':2.5,'circle-stroke-color':'#4a9eff'}});
+
+  const ALL_PHOTOS=[{"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5724, 29.3278]}, "properties": {"t": 493}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5268, 29.3587]}, "properties": {"t": 590}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5172, 29.3904]}, "properties": {"t": 593}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5089, 29.4046]}, "properties": {"t": 593}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5546, 29.5751]}, "properties": {"t": 605}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5208, 29.4676]}, "properties": {"t": 597}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.572, 29.7129]}, "properties": {"t": 612}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5768, 29.7848]}, "properties": {"t": 617}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5761, 29.805]}, "properties": {"t": 617}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5766, 29.8266]}, "properties": {"t": 618}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5843, 30.0656]}, "properties": {"t": 632}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.593, 30.0756]}, "properties": {"t": 632}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5801, 30.1969]}, "properties": {"t": 641}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5796, 30.1985]}, "properties": {"t": 642}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6534, 30.3571]}, "properties": {"t": 934}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6689, 30.3551]}, "properties": {"t": 968}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.659, 30.3593]}, "properties": {"t": 1006}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6649, 30.3656]}, "properties": {"t": 1009}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6676, 30.3745]}, "properties": {"t": 1009}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6874, 30.4089]}, "properties": {"t": 1013}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6955, 30.422]}, "properties": {"t": 1014}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7037, 30.4353]}, "properties": {"t": 1014}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7121, 30.449]}, "properties": {"t": 1015}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7435, 30.486]}, "properties": {"t": 1018}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.8843, 30.5813]}, "properties": {"t": 1030}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.8945, 30.5876]}, "properties": {"t": 1031}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.8886, 30.5947]}, "properties": {"t": 1032}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7977, 30.6596]}, "properties": {"t": 1042}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7941, 30.6676]}, "properties": {"t": 1042}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7931, 30.6807]}, "properties": {"t": 1043}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7903, 30.6936]}, "properties": {"t": 1044}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7842, 30.723]}, "properties": {"t": 1046}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7675, 30.8193]}, "properties": {"t": 1054}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7808, 30.8332]}, "properties": {"t": 1054}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7671, 30.9721]}, "properties": {"t": 1065}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7526, 30.9824]}, "properties": {"t": 1065}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.7407, 30.9882]}, "properties": {"t": 1066}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6616, 30.9947]}, "properties": {"t": 1072}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6576, 31.0112]}, "properties": {"t": 1072}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6255, 31.0629]}, "properties": {"t": 1077}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.6082, 31.073]}, "properties": {"t": 1077}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.5713, 31.2163]}, "properties": {"t": 1085}}, {"type": "Feature", "geometry": {"type": "Point", "coordinates": [-103.4869, 31.4004]}, "properties": {"t": 1101}}];
+  map.addSource('photos',{type:'geojson',data:{type:'FeatureCollection',features:ALL_PHOTOS}});
+  map.addLayer({id:'photo-heat',type:'heatmap',source:'photos',paint:{'heatmap-radius':30,'heatmap-opacity':0.65,'heatmap-color':['interpolate',['linear'],['heatmap-density'],0,'rgba(0,0,0,0)',0.05,'rgba(103,169,207,0.5)',0.5,'rgba(254,224,144,0.75)',0.8,'rgba(252,141,89,0.88)',1,'rgba(215,48,31,0.95)']}});
+  
+
+  if (routeCoords.length > 0) {
+    const bounds = routeCoords.reduce(
+      (b,c) => b.extend(c),
+      new mapboxgl.LngLatBounds(routeCoords[0], routeCoords[0])
+    );
+    window._mapBounds = bounds;
+    map.fitBounds(bounds,{padding:{top:90,right:40,bottom:_tlPadBottom(),left:40},duration:0});
+  } else {
+    window._mapBounds = map.getBounds();
+  }
+
+  map.on('rotate', function() {
+    var b = map.getBearing();
+    document.getElementById('compass-svg').style.transform = 'rotate('+(-b)+'deg)';
+  });
+
+  
+  if(typeof window.tlSync==='function')window.tlSync();else if(typeof window.tlUpdate==='function')window.tlUpdate(0);
+
+  document.getElementById('chk-route').addEventListener('change',e=>{['route','route-casing'].forEach(id=>map.setLayoutProperty(id,'visibility',e.target.checked?'visible':'none'));});
+  document.getElementById('chk-heat').addEventListener('change',e=>map.setLayoutProperty('photo-heat','visibility',e.target.checked?'visible':'none'));
+  document.getElementById('chk-poi-border').addEventListener('change',e=>(poiGroups['border']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-checkout').addEventListener('change',e=>(poiGroups['checkout']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-work').addEventListener('change',e=>(poiGroups['work']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-food').addEventListener('change',e=>(poiGroups['food']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-carwash').addEventListener('change',e=>(poiGroups['carwash']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-ticket').addEventListener('change',e=>(poiGroups['ticket']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-checkin').addEventListener('change',e=>(poiGroups['checkin']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+  document.getElementById('chk-poi-charging').addEventListener('change',e=>(poiGroups['charging']||[]).forEach(m=>m.getElement().style.display=e.target.checked?'':'none'));
+});
+var _lb=document.getElementById('layers-btn'),_ls=document.getElementById('layer-sheet'),_lc=document.getElementById('layer-sheet-close'),_lbd=document.getElementById('layer-sheet-backdrop');
+_lb.addEventListener('click',function(e){e.stopPropagation();_ls.classList.toggle('open');});
+_lc.addEventListener('click',function(){_ls.classList.remove('open');});
+_lbd.addEventListener('click',function(){_ls.classList.remove('open');});
+document.getElementById('btn-compass').addEventListener('click',function(){map.easeTo({bearing:0,duration:300});});
+map.on('pitch',function(){document.getElementById('btn-3d').textContent=map.getPitch()>5?'3D':'2D';});
+document.getElementById('btn-3d').addEventListener('click',function(){map.easeTo({pitch:map.getPitch()>5?0:60,duration:500});});
+document.getElementById('btn-locate').addEventListener('click',function(){map.fitBounds(window._mapBounds,{padding:{top:90,right:40,bottom:_tlPadBottom(),left:40},duration:500});});
+</script>
+<script>
+document.addEventListener('gesturestart',function(e){e.preventDefault();},false);
+document.addEventListener('touchmove',function(e){if(e.scale!==undefined&&e.scale!==1)e.preventDefault();},{passive:false});
+(function(){var _lt=0;document.addEventListener('touchend',function(e){var now=Date.now();if(now-_lt<300)e.preventDefault();_lt=now;},{passive:false});})();
+</script>
+</body>
+</html>
