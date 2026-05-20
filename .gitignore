@@ -1,0 +1,4 @@
+# Intermediate timelapse files — only merged *.mp4 are tracked
+**/timelaps/tesla.mp4
+**/timelaps/hike-*.mp4
+**/timelaps/segs.json
