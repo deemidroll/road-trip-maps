@@ -121,6 +121,8 @@ map.on('load', () => {
   map.addSource('hike-0',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
   map.addLayer({id:'hike-0-casing',type:'line',source:'hike-0',layout:{'line-cap':'round','line-join':'round','visibility':'none'},paint:{'line-color':'#ffffff','line-width':5.5,'line-opacity':0.9}});
   map.addLayer({id:'hike-0',type:'line',source:'hike-0',layout:{'line-cap':'round','line-join':'round','visibility':'none'},paint:{'line-color':'rgb(233,95,42)','line-width':3.5,'line-opacity':1}});
+  map.addSource('phone-track',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[[-119.640156, 37.478357], [-119.635815, 37.47381], [-119.801493, 37.754929], [-119.803037, 37.756332], [-119.80332, 37.756825], [-119.737132, 37.787699], [-119.736611, 37.78804], [-119.571169, 37.809617], [-119.488765, 37.812541]]}}}});
+  map.addLayer({id:'phone-track',type:'line',source:'phone-track',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#ff9800','line-width':2,'line-opacity':0.7}});
 
   if (routeCoords.length > 0) {
     const bounds = routeCoords.reduce(
