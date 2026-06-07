@@ -115,6 +115,8 @@ map.on('load', () => {
 
   
   
+  map.addSource('phone-track',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[[-121.99806, 37.406963]]}}}});
+  map.addLayer({id:'phone-track',type:'line',source:'phone-track',layout:{'line-cap':'round','line-join':'round'},paint:{'line-color':'#ff9800','line-width':2,'line-opacity':0.7}});
 
   if (routeCoords.length > 0) {
     const bounds = routeCoords.reduce(
