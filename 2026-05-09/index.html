@@ -135,6 +135,7 @@ map.on('load', () => {
   map.addSource('hike-2',{type:'geojson',data:{type:'Feature',geometry:{type:'LineString',coordinates:[]}}});
   map.addLayer({id:'hike-2-casing',type:'line',source:'hike-2',layout:{'line-cap':'round','line-join':'round','visibility':'none'},paint:{'line-color':'#ffffff','line-width':5.5,'line-opacity':0.9}});
   map.addLayer({id:'hike-2',type:'line',source:'hike-2',layout:{'line-cap':'round','line-join':'round','visibility':'none'},paint:{'line-color':'rgb(233,95,42)','line-width':3.5,'line-opacity':1}});
+  
 
   if (routeCoords.length > 0) {
     const bounds = routeCoords.reduce(
